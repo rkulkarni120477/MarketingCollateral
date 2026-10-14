@@ -1,0 +1,38 @@
+# Source workbook: contains a credential and internal comments. Keep out of git (data-issues Q15).
+data/*.xlsx
+data/*.xls
+data/*.csv
+
+# Secrets and local settings
+.env
+.env.*
+local.settings.json
+*.pfx
+*.key
+*.pem
+secrets.json
+
+# Migration source copies and reports (may contain internal documents)
+migration/source/
+migration/report*.csv
+
+# Node / SPFx / Functions build output
+node_modules/
+dist/
+lib/
+temp/
+*.sppkg
+release/
+.azurefunctions/
+.vs/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Editor and OS
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db

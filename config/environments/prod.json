@@ -1,0 +1,52 @@
+{
+  "_comment": "Prod environment values. Every value is a proposal until its status is 'confirmed'. No secrets belong in this file. Prod is not provisioned until the owner approves (brief rule 2).",
+  "environment": "prod",
+  "tenant": {
+    "url": "https://academian1.sharepoint.com",
+    "status": "unconfirmed (inferred from workbook links)"
+  },
+  "site": {
+    "serverRelativePath": "/sites/MarketingCollateral",
+    "title": "MarketingCollateral",
+    "status": "unconfirmed"
+  },
+  "groups": {
+    "owners": "SG-MC-Admins",
+    "contributors": "SG-Marketing",
+    "approvers": "SG-MC-Approvers",
+    "visitors": ["DL-Sales", "DL-AMs"],
+    "status": "unconfirmed (proposed names)"
+  },
+  "clearanceAuthority": {
+    "displayName": "Kaushal Jha",
+    "email": "kaushalj@academian.com",
+    "status": "unconfirmed (inferred from workbook)"
+  },
+  "sharedMailbox": {
+    "address": "marketing-portal@academian.com",
+    "status": "unconfirmed (proposed; not in workbook)"
+  },
+  "functionApp": {
+    "name": "mc-api-prod",
+    "runtime": "node-22",
+    "region": "TBC",
+    "status": "unconfirmed"
+  },
+  "keyVault": {
+    "name": "TBC-prod",
+    "status": "unconfirmed"
+  },
+  "featureFlags": {
+    "aiEnabled": false
+  },
+  "notifications": {
+    "digestTimeLocal": "TBC",
+    "defaultMode": "daily-digest",
+    "status": "unconfirmed"
+  },
+  "restrictedLibraries": ["RateCards"],
+  "versioning": {
+    "majorVersionLimit": 50,
+    "minorVersionLimit": 10
+  }
+}

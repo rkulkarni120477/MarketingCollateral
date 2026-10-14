@@ -1,0 +1,15 @@
+{
+  "_comment": "PROPOSED mapping from workbook domain codes to the Domain term set. Not applied. Confirm each line (data-issues Q4). AD is an assumption.",
+  "status": "proposed",
+  "termSet": "Domain",
+  "terms": ["K-12", "Higher Education", "Workforce Development", "HE + Workforce", "All Domains"],
+  "codes": {
+    "AD": { "term": "All Domains", "confidence": "assumed" },
+    "ALL": { "term": "All Domains", "confidence": "proposed" },
+    "K12": { "term": "K-12", "confidence": "proposed" },
+    "K-12": { "term": "K-12", "confidence": "proposed" },
+    "HE": { "term": "Higher Education", "confidence": "proposed" },
+    "WD": { "term": "Workforce Development", "confidence": "proposed" },
+    "HE+WD": { "term": "HE + Workforce", "confidence": "proposed" }
+  }
+}
