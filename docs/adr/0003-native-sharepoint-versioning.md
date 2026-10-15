@@ -1,6 +1,6 @@
 # ADR-0003: Native SharePoint versioning and check-out for file history
 
-- **Status:** Proposed
+- **Status:** Accepted (owner, 2026-10-15)
 - **Date:** 2026-10-14
 
 ## Context

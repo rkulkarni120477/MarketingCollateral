@@ -1,6 +1,6 @@
 # ADR-0007: AI behind a feature flag, with non-AI search always working
 
-- **Status:** Proposed
+- **Status:** Accepted (owner, 2026-10-15)
 - **Date:** 2026-10-14
 
 ## Context

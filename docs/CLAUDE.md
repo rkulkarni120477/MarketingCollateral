@@ -74,7 +74,7 @@ Later phases (not yet scaffolded): `npm test` / `npm run lint` in `spfx/` and `a
 
 ## Data facts that matter (full list: docs/data-issues.md)
 
-- Workbook: `data/MarketingCollateral.xlsx` (sha256 `95F762CA…05B2`). A second copy, `MarketingCollateral (1).xlsx` in Downloads, has **identical cell content** (only file metadata differs). Used the one named in the brief.
+- Workbook: `data/MarketingCollateral.xlsx` (sha256 `D3C2BAA4…D861A` (after the 2026-10-15 D1 date fix)). A second copy, `MarketingCollateral (1).xlsx` in Downloads, has **identical cell content** (only file metadata differs). Used the one named in the brief.
 - Counts (match Home dashboard): Presentations 66, One-Pagers 22, Brochures 2, Case Studies 0, Marketing Videos 0, **Rate Cards 0** (Home count cell is blank — no rows, no formula).
 - **Status is blank for all 66 presentations**, and Source/Published PDF are blank for all presentations. The brief's rule "blank → Under Revision" would import all 66 as Under Revision. Needs a decision.
 - Dates are native Excel date cells, not serial numbers (the brief's `46276` example does not occur). Serial conversion is still implemented defensively in the import.

@@ -1,6 +1,6 @@
 # ADR-0008: Provisioning with idempotent PnP.PowerShell scripts
 
-- **Status:** Proposed
+- **Status:** Accepted (owner, 2026-10-15)
 - **Date:** 2026-10-14
 
 ## Context

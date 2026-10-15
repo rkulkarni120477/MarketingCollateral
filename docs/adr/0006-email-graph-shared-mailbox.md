@@ -1,6 +1,6 @@
 # ADR-0006: Email via Graph sendMail from a shared mailbox
 
-- **Status:** Proposed
+- **Status:** Accepted (owner, 2026-10-15)
 - **Date:** 2026-10-14
 
 ## Context

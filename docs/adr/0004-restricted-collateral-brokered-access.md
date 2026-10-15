@@ -1,6 +1,6 @@
 # ADR-0004: Restricted collateral: broken inheritance and brokered access
 
-- **Status:** Proposed
+- **Status:** Accepted (owner, 2026-10-15)
 - **Date:** 2026-10-14
 
 ## Context

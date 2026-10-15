@@ -1,6 +1,6 @@
 # ADR-0005: Change detection: list webhooks, Graph delta, timer fallback
 
-- **Status:** Proposed
+- **Status:** Accepted (owner, 2026-10-15)
 - **Date:** 2026-10-14
 
 ## Context

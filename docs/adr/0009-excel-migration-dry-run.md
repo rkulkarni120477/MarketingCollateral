@@ -1,6 +1,6 @@
 # ADR-0009: Excel migration: dry run by default, no secrets, no personal OneDrive
 
-- **Status:** Proposed
+- **Status:** Accepted (owner, 2026-10-15)
 - **Date:** 2026-10-14
 
 ## Context

@@ -1,6 +1,6 @@
 # ADR-0001: SharePoint Online + SPFx as the front end and system of record
 
-- **Status:** Proposed
+- **Status:** Accepted (owner, 2026-10-15)
 - **Date:** 2026-10-14
 
 ## Context

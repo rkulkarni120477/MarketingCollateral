@@ -1,0 +1,31 @@
+{
+  "_comment": "Owner name -> Entra UPN. Only addresses the owner has confirmed are filled in. Others are resolved against Entra ID at import; never guessed.",
+  "status": "confirmed",
+  "owners": [
+    {
+      "name": "Kaushal Jha",
+      "upn": "kaushalj@academian.com",
+      "source": "confirmed (Q6)"
+    },
+    {
+      "name": "Rahul Kulkarni",
+      "upn": "rkulkarni@academian.com",
+      "source": "confirmed (owner's account)"
+    },
+    {
+      "name": "Puneet Saraf",
+      "upn": "psaraf@academian.com",
+      "source": "confirmed by owner (2026-10-15)"
+    },
+    {
+      "name": "Priyanka Salgar",
+      "upn": "psalgar@academian.com",
+      "source": "confirmed by owner (2026-10-15)"
+    },
+    {
+      "name": "Nimisha Dubey",
+      "upn": "ndubey@academian.com",
+      "source": "confirmed by owner (2026-10-15)"
+    }
+  ]
+}

@@ -93,7 +93,7 @@ HE: Sprin` ×5, `ALL K-12+HE+WF logos are intact.` ×4, `Note: Multiverse is men
 
 - State: **visible**
 - Dimensions: A1:K25; non-empty rows: 21
-- Header (row 1): `<col 1>` | `Total Logos: 35` | `<col 3>` | `Last updated on: 24 Aug 2026` | `<col 5>` | `Stats` | `<col 7>` | `Approved By` | `Updated on` | `<col 10>` | `<col 11>`
+- Header (row 1): `<col 1>` | `Total Logos: 35` | `<col 3>` | `Last updated on: 1 Sep 2026` | `<col 5>` | `Stats` | `<col 7>` | `Approved By` | `Updated on` | `<col 10>` | `<col 11>`
 
 - Data rows after header: 20
 
@@ -102,7 +102,7 @@ HE: Sprin` ×5, `ALL K-12+HE+WF logos are intact.` ×4, `Note: Multiverse is men
 | <col 1> | 0/20 | {} | 0 |  |
 | Total Logos: 35 | 15/20 | {'str': 15} | 0 | `K12 (14)` ×1, `Benchmark Education` ×1, `Follett` ×1, `Renaissance` ×1, `Stride` ×1, `Carnegie Learning` ×1 |
 | <col 3> | 10/20 | {'str': 10} | 0 | `HE (9)` ×1, `Ellucian` ×1, `Crimson` ×1, `Springer Publishing` ×1, `SNHU` ×1, `OU Education Services` ×1 |
-| Last updated on: 24 Aug 2026 | 13/20 | {'str': 13} | 0 | `WD (12)` ×1, `Unitek Learning` ×1, `CFA Institute` ×1, `Simplilearn` ×1, `BCG` ×1, `Aviation Institute of Maintenance (AIM)` ×1 |
+| Last updated on: 1 Sep 2026 | 13/20 | {'str': 13} | 0 | `WD (12)` ×1, `Unitek Learning` ×1, `CFA Institute` ×1, `Simplilearn` ×1, `BCG` ×1, `Aviation Institute of Maintenance (AIM)` ×1 |
 | <col 5> | 0/20 | {} | 0 |  |
 | Stats | 20/20 | {'str': 20} | 0 | `FTEs` ×1, `Visual Designers` ×1, `Motion Graphics/ Animators​` ×1, `Program/ Project Managers​` ×1, `Quality Assurance​` ×1, `IT Operations/ Back-Office Support​` ×1 |
 | <col 7> | 18/20 | {'int': 11, 'str': 7} | 0 | `50` ×2, `700` ×1, `70` ×1, `85` ×1, `75` ×1, `60` ×1 |
