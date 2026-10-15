@@ -5,9 +5,9 @@ SharePoint Online portal for Academian's marketing collateral. Replaces `data/Ma
 **Status:** Phase 1 (discovery and scaffolding). No application code yet. Waiting on the Phase 1 checkpoint.
 
 - Working rules, architecture summary, commands and conventions: [CLAUDE.md](CLAUDE.md)
-- What is wrong with the source data, and the questions to answer: [docs/data-issues.md](docs/data-issues.md)
-- Architecture: [docs/architecture.md](docs/architecture.md) · Decisions: [docs/adr/](docs/adr/README.md)
-- Security model and residual risk: [docs/security.md](docs/security.md)
+- What is wrong with the source data, and the questions to answer: [docs/data-issues.md](data-issues.md)
+- Architecture: [docs/architecture.md](architecture.md) · Decisions: [docs/adr/](adr/README.md)
+- Security model and residual risk: [docs/security.md](security.md)
 
 ## Layout
 

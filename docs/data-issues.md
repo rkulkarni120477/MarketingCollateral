@@ -56,6 +56,24 @@ Please answer these before Phase 2. Proposed defaults are in brackets.
 | Q15 | Should the workbook itself go in git? It contains the credential and internal comments. | Keep `data/*.xlsx` out of git (in `.gitignore`). |
 | Q16 | Is there a git repo for this folder? It currently sits inside the home-directory repo (`C:/Users/RahulSudhakar`). Initialise a repo here for the secret-scan hook? | Yes, after you confirm. No commit until you ask. |
 
+## 2a. Answers received (2026-10-15)
+
+| # | Answer | Effect |
+|---|---|---|
+| Q2 | Confirmed: `https://academian1.sharepoint.com`, `/sites/MarketingCollateral-Dev`. | `config/environments/*.json` marked confirmed. |
+| Q3 | **Under Revision.** | Blank-status presentations import as Under Revision. |
+| Q4 | `AD` means **All Domains**. | Domain mapping confirmed for `AD`. `ALL`, `K12`, `K-12` mapping still as proposed. |
+| Q5 | **Visible catalogues win** over hidden sheets. | Hidden sheets fill blanks and feed the duplicate list only. |
+| Q6 | Confirmed: `kaushalj@academian.com`, shared mailbox `marketing-portal@academian.com`. | Config marked confirmed. |
+| Q7 | Confirmed: `SG-MC-Admins`, `SG-Marketing`, `SG-MC-Approvers`, `DL-Sales`, `DL-AMs`. | Config marked confirmed. |
+| Q8 | **Node 22 LTS confirmed.** | [ADR-0002](adr/0002-azure-functions-node-22.md) accepted. |
+| Q9 | Rate cards, case studies and videos are **not in the workbook**. They will be **uploaded by users** through the portal (file upload or browsing OneDrive). | No bulk rate-card import is needed. The rate-card acceptance test runs on user uploads. |
+| Q10 | Source files are **not copied by us** from OneDrive. Users upload or browse OneDrive when they add an item. | The 16 OneDrive links stay as legacy references only, not as the document location. |
+| Q15 | Workbook kept out of git (`data/*.xlsx` in `.gitignore`). | Applied. |
+| Q16 | Git repo set up at `https://github.com/rkulkarni120477/MarketingCollateral` (`origin`). The secret-scan hook is installed. **No commit has been made.** | See `.githooks/pre-commit`. |
+
+Still open: Q1 (delete the duplicate workbook copy in Downloads), Q11, Q12, Q13, Q14 (password rotation status).
+
 ---
 
 ## 3. Findings

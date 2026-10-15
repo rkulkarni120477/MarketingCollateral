@@ -33,7 +33,7 @@ Status: **draft for Phase 1 checkpoint.** Nothing here is deployed.
 - No secrets in the repo. `.gitignore` excludes `.env*`, `local.settings.json`, `*.pfx`, `*.key`, and `data/*.xlsx`.
 - Runtime secrets live in **Azure Key Vault**, read through **managed identity**. No connection strings in app settings.
 - The **plaintext password** in the workbook (`Home!B18`) is **not** migrated, not stored, and not reproduced in any repo file. It must be rotated, and the showcase page it protects checked (data-issues Q14).
-- A **secret-scan pre-commit hook** is required (brief §11). It is deferred until the repo is under git (data-issues Q16).
+- A **secret-scan pre-commit hook** (`.githooks/pre-commit`, enabled with `git config core.hooksPath .githooks`) blocks commits whose added lines match common secret patterns. It prints file and line only, never the value. It is a backstop, not a substitute for keeping secrets out of files.
 
 ## 4. Graph and tenant permissions (least privilege)
 

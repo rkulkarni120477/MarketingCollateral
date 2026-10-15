@@ -1,6 +1,6 @@
 # ADR-0002: Azure Functions on Node 22 LTS
 
-- **Status:** Proposed — **deviates from the brief** (brief says Node 20)
+- **Status:** Accepted (owner confirmed 2026-10-15) — **deviates from the brief** (brief says Node 20)
 - **Date:** 2026-10-14
 
 ## Context

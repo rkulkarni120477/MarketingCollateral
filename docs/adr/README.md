@@ -5,7 +5,7 @@ One decision per file. Status is **Proposed** until the project owner accepts it
 | ADR | Title | Status |
 |---|---|---|
 | [0001](0001-spfx-sharepoint-front-end.md) | SharePoint Online + SPFx as the front end and system of record | Proposed |
-| [0002](0002-azure-functions-node-22.md) | Azure Functions on Node 22 LTS (deviates from brief's Node 20) | Proposed |
+| [0002](0002-azure-functions-node-22.md) | Azure Functions on Node 22 LTS (deviates from brief's Node 20) | Accepted |
 | [0003](0003-native-sharepoint-versioning.md) | Native SharePoint versioning and check-out for file history | Proposed |
 | [0004](0004-restricted-collateral-brokered-access.md) | Restricted collateral: broken inheritance and brokered access | Proposed |
 | [0005](0005-change-detection-webhooks-delta.md) | Change detection: list webhooks, Graph delta, timer fallback | Proposed |

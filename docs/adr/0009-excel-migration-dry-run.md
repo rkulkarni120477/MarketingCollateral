@@ -19,6 +19,7 @@ The workbook is the current source of truth and contains: a plaintext password (
 
 - Dry run must be reviewed before any apply (Phase 3 checkpoint).
 - Some rows will need manual decisions. The report lists them.
+- Rate cards, case studies and videos are not in the workbook. Users upload them through the portal, so the importer does not need them.
 - The workbook stays out of git (`.gitignore`).
 
 ## Alternatives considered

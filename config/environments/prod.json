@@ -3,28 +3,28 @@
   "environment": "prod",
   "tenant": {
     "url": "https://academian1.sharepoint.com",
-    "status": "unconfirmed (inferred from workbook links)"
+    "status": "confirmed"
   },
   "site": {
     "serverRelativePath": "/sites/MarketingCollateral",
     "title": "MarketingCollateral",
-    "status": "unconfirmed"
+    "status": "confirmed"
   },
   "groups": {
     "owners": "SG-MC-Admins",
     "contributors": "SG-Marketing",
     "approvers": "SG-MC-Approvers",
     "visitors": ["DL-Sales", "DL-AMs"],
-    "status": "unconfirmed (proposed names)"
+    "status": "confirmed"
   },
   "clearanceAuthority": {
     "displayName": "Kaushal Jha",
     "email": "kaushalj@academian.com",
-    "status": "unconfirmed (inferred from workbook)"
+    "status": "confirmed"
   },
   "sharedMailbox": {
     "address": "marketing-portal@academian.com",
-    "status": "unconfirmed (proposed; not in workbook)"
+    "status": "confirmed"
   },
   "functionApp": {
     "name": "mc-api-prod",

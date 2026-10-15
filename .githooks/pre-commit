@@ -1,0 +1,21 @@
+#!/bin/sh
+# Secret-scan pre-commit hook (brief §11).
+# Scans only the ADDED lines of the staged diff and blocks the commit on a match.
+# It prints file names and line numbers, never the matched text.
+# Install once per clone: git config core.hooksPath .githooks
+
+PATTERNS='password[[:space:]]*[:=][[:space:]]*[^[:space:]]+|client_secret[[:space:]]*[:=]|AccountKey=|SharedAccessSignature=|-----BEGIN (RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----|AKIA[0-9A-Z]{16}|xox[baprs]-[0-9A-Za-z-]{10,}'
+
+# Exclude this hook from its own scan (it names the patterns on purpose).
+hits=$(git diff --cached -U0 --no-color --ignore-cr-at-eol -- . ':!.githooks/pre-commit' \
+  | awk '/^\+\+\+ /{file=substr($0,7)} /^@@/{split($3,a,","); line=substr(a[1],2)+0} /^\+[^+]/{print file ":" line ": " substr($0,2)} /^\+[^+]/{line++}' \
+  | grep -Ei "$PATTERNS" \
+  | cut -d: -f1,2)
+
+if [ -n "$hits" ]; then
+  echo "secret-scan: possible secret in staged changes (values not shown):"
+  echo "$hits"
+  echo "Remove the value, move it to Key Vault or local settings (gitignored), then re-stage."
+  exit 1
+fi
+exit 0

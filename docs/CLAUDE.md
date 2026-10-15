@@ -19,7 +19,7 @@ Working memory for Claude Code sessions. Read this first. Keep it current when d
 4. Do not invent facts about the data. Ambiguities go in `docs/data-issues.md`, then ask.
 5. **Never migrate the plaintext password** found in the workbook (`Home!B18`). Do not copy it into code, config, docs or logs.
 6. Prefer boring, supported Microsoft patterns. Pin all package versions.
-7. Commit and push only when asked. Do not create a git repo or commit without asking (see Open decisions).
+7. Commit and push only when asked. The repo is set up at `https://github.com/rkulkarni120477/MarketingCollateral` (`origin`, branch `main`), with `core.hooksPath` set to `.githooks`.
 
 ## Architecture (summary — details in docs/architecture.md and docs/adr/)
 
@@ -84,9 +84,9 @@ Later phases (not yet scaffolded): `npm test` / `npm run lint` in `spfx/` and `a
 
 ## Open decisions (ask before Phase 2)
 
-See `docs/data-issues.md` § "Decisions needed". Summary: tenant/site/groups/emails, domain code `AD`, default status for blank rows, which workbook copy is authoritative, Node 22 vs 20, whether the workbook itself is kept in git, the rate-card source files, and brand assets.
+Answered on 2026-10-15 (see `docs/data-issues.md` §2a): status Under Revision, `AD` = All Domains, visible catalogues win, tenant/groups/emails confirmed, Node 22, rate cards via user upload, repo set up. Still open: Q1, Q11–Q14 (sensitivity list, owner UPN mapping, brand, password rotation).
 
 ## Security notes
 
 - Residual risk for downloads outside the portal is documented in `docs/security.md`.
-- No secrets in the repo. `.gitignore` excludes `data/*.xlsx`, `.env*`, and local settings. The secret-scan pre-commit hook is deferred until git is set up (Open decisions).
+- No secrets in the repo. `.gitignore` excludes `data/*.xlsx`, `.env*`, and local settings. The secret-scan hook (`.githooks/pre-commit`) is installed.
