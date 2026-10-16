@@ -1,0 +1,11 @@
+{
+  "_status": "Native lifecycle values per brief. Blank raw status is preserved and maps to Not specified.",
+  "_version": 1,
+  "lifecycle": ["Draft", "In Review", "Published", "Archived"],
+  "blankRawStatus": "Not specified",
+  "blankRawFlag": "NeedsStatusReview",
+  "underRevisionIndicator": {
+    "_status": "PROPOSED definition, pending owner decision. Not a lifecycle value.",
+    "definition": "Record is In Review OR has an open import review flag (conflicting or unresolved evidence)."
+  }
+}

@@ -1,0 +1,204 @@
+"""Generate docs/workbook-traceability.md and fail if any workbook column has no matrix row.
+
+    python -X utf8 -B scripts/generate_traceability.py --workbook MarketingCollateral.xlsx
+
+Only headers and cell positions are read. Comment and hidden-note text is never copied.
+"""
+import argparse
+import re
+import sys
+from pathlib import Path
+
+import openpyxl
+
+ROOT = Path(__file__).resolve().parents[1]
+
+# Visibility vocabulary: Reader | Maintainer | Owner | Restricted | Excluded | Derived
+# Each row: (sheet, columns, source field, destination, transformation, visibility, acceptance test)
+ROWS = [
+    # --- Home -------------------------------------------------------------
+    ("Home", "A1:A7", "Index numbers (#)", "Not imported", "Display order is set by the category card order, not the source index", "Excluded", "Six cards render in the order defined in category-sheets.json"),
+    ("Home", "B2:B7", "Collateral Type labels", "Category names (MC_Catalogue.Category, card titles)", "Used as the six category names; no free-text category invented", "Reader", "Six category names match the workbook labels"),
+    ("Home", "C2:C6", "Asset Count formulas (COUNTA on each catalogue sheet, range to row 999)", "Derived count on Overview cards", "Recalculated from imported, non-archived records; the formula is kept as provenance only", "Derived", "Cached formula values 66, 22, 2, 0, 0 equal imported counts (reconciliation test)"),
+    ("Home", "C7", "No count formula for Rate Cards", "Derived count (0)", "Counted from MC_Catalogue; the missing formula is recorded as a gap", "Derived", "Rate Cards shows 0 with an empty state"),
+    ("Home", "D1:D7", "Published column (unpopulated)", "Derived Published count", "Count of records with normalised status Published; the placeholder is not copied", "Derived", "Published count equals records with status Published"),
+    ("Home", "E1:E7", "Under Revision column (unpopulated)", "Derived review indicator", "PROPOSED: In Review OR open import review flag; labelled as an indicator, not a lifecycle value", "Derived", "Indicator matches the definition in status-rules.json"),
+    ("Home", "F2:F7", "View Catalogue links to internal sheets (relative/internal targets)", "In-page filtered catalogue route", "Internal sheet target is replaced by the in-page route for the category; no workbook link reaches readers", "Reader", "Each card link restores the category filter on the same page"),
+    ("Home", "B15", "Purpose text", "Overview purpose text", "Text kept as provided, whitespace normalised", "Reader", "Purpose text renders on Overview"),
+    ("Home", "B17", "Showcase link (SafeLinks-wrapped https://academian.com/projects-showcase/)", "Overview showcase link", "Outlook SafeLinks wrapper unwrapped to the destination URL in the url parameter; no tracking query retained", "Reader", "Link resolves to https://academian.com/projects-showcase/ and carries no SafeLinks parameters"),
+    ("Home", "B18", "Plaintext credential", "NOT IMPORTED", "Excluded before any intermediate output; only the coordinate and reason are recorded", "Excluded", "Credential absent from model, reports, fixtures, logs and browser payloads (test_credential_value_absent_from_model)"),
+    # --- Logos_Stats: client names -----------------------------------------
+    ("Logos_Stats", "B1", "Total Logos formula (COUNTA of B3:D21)", "Derived total of client entries", "Recalculated as a count of client entries; distinct clients reported separately", "Derived", "Total entries = 35"),
+    ("Logos_Stats", "B2:D2", "Per-domain header formulas: K12 (14), HE (9), WD (12)", "Derived counts by domain", "Counts computed per domain from MC_Clients; headers built from the domain labels", "Derived", "K12 14, HE 9, WD 12"),
+    ("Logos_Stats", "B3:B16", "K12 client names (Table5 column)", "MC_Clients (Name, Domain = K-12)", "Whitespace and zero-width characters removed; original spelling kept as provenance; no spelling changed automatically", "Reader", "14 K12 client records; original spelling retained"),
+    ("Logos_Stats", "C3:C11", "HE client names", "MC_Clients (Name, Domain = Higher Education)", "As above", "Reader", "9 HE client records"),
+    ("Logos_Stats", "D3:D14", "WD client names", "MC_Clients (Name, Domain = Workforce Development)", "As above", "Reader", "12 WD client records"),
+    ("Logos_Stats", "B3:D21 (logo instructions)", "Logo entries lacking an image file", "MC_Clients.LogoFile (blank); logo availability tracked separately", "No image assumed; a missing logo shows a text fallback", "Reader", "Text fallback shown for every client until a logo is approved"),
+    ("Logos_Stats", "C11", "Client entry with a cell comment (author and date provenance)", "MC_Clients provenance note (Restricted) and review task if the date conflicts with stat dates", "Comment text stays in the restricted store; presence recorded", "Restricted", "Comment text absent from reader payloads"),
+    ("Logos_Stats", "B2 comments (G2, G9)", "Cell comments on FTE rows describing prior counts", "MC_ProtectedNotes (Restricted); review task for conflicting statistics", "Historical figures are not imported as approved values", "Restricted", "No historical FTE figure appears as a current statistic"),
+    # --- Logos_Stats: company statistics -----------------------------------
+    ("Logos_Stats", "D1", "Last updated on: 24 Aug 2026 (header text)", "MC_Statistics.HeaderDate (parsed date)", "Text parsed to native date; original text kept", "Reader", "Header date 2026-08-24 imported and shown"),
+    ("Logos_Stats", "F1, H1, I1", "Column headers Stats, Approved By, Updated on", "Field labels only", "Used to name approval and date fields", "Excluded", "Labels are not shown as data"),
+    ("Logos_Stats", "F2:G2", "FTEs label and total formula =SUM(G3:G10) = 700", "MC_Statistics.FteTotal (derived; not editable)", "Recalculated from eligible components rows 3-10; never typed over", "Derived", "Recalculated total = 700; equals cached formula value"),
+    ("Logos_Stats", "F3:F10", "Eligible role labels (8 roles)", "MC_StatComponents.Label (InTotal = true)", "Trailing zero-width characters removed; labels kept", "Reader", "8 eligible components imported"),
+    ("Logos_Stats", "G3:G10", "Eligible role FTE values (sum 700)", "MC_StatComponents.Fte (InTotal = true)", "Numeric values kept as exact numbers; edits trigger recalculation", "Maintainer", "Editing one component changes the total and every share"),
+    ("Logos_Stats", "F11:G12", "Accessibility Services 50; Trained Editorial Professionals 25 (outside SUM)", "MC_StatComponents (InTotal = false)", "Kept as components but excluded from total and shares", "Reader", "Neither value enters the FTE total"),
+    ("Logos_Stats", "H2", "Approved By header: name recorded (identity not stored in repo docs)", "MC_Statistics.ApprovalName (identity unresolved)", "Name kept as text; no directory identity guessed. Scope to rows 3-10 is an ASSUMPTION", "Maintainer", "Approval shown as name recorded; identity unresolved"),
+    ("Logos_Stats", "H11:H12", "Approval TBD on outside-total rows", "MC_StatComponents.ApprovalState = Unapproved (TBD)", "TBD mapped to Unapproved, never to Approved", "Reader", "Two rows display Unapproved"),
+    ("Logos_Stats", "I2", "Updated on 1 Sep 2026 (FTE block)", "MC_Statistics.EffectiveDate", "Native date kept", "Reader", "Effective date 2026-09-01 shown"),
+    ("Logos_Stats", "F13:G19", "Qualified statistics (500+, 30+, 5+, 200+, 5M+, 13+, 1000+)", "MC_Statistics (Label, ValueRaw, ValueNumber, Unit, Qualifier)", "Parsed into number and qualifier; never converted to an exact number", "Reader", "Raw text and qualifier both displayed (e.g. 500+ as at least 500)"),
+    ("Logos_Stats", "I13:I15", "Effective dates 1 Sep 2026 on statistics", "MC_Statistics.EffectiveDate", "Native date kept; differs from header date", "Reader", "Mismatch with header date flagged HeaderDateMismatchStatisticDate"),
+    ("Logos_Stats", "J2:J10 (role %)", "Role percentage formulas =Gn/$J$2", "Derived MC_StatComponents.Share", "Share = Fte / eligible total; blank when total is zero or missing", "Derived", "Shares sum to 1 across eligible components; zero total gives blank shares"),
+    ("Logos_Stats", "F21", "Policy note: statistic changes must carry forward to collateral and solution artefacts", "Maintainer guidance; drives review task creation", "Policy kept as guidance text", "Maintainer", "Changing a statistic creates review tasks (see data-decisions.md)"),
+    ("Logos_Stats", "F22", "Proposal Templates & Slides Repository (label)", "Overview link label to the repository (no URL in source)", "Label only; no target invented", "Reader", "Label shown without a link"),
+    # --- 01 Presentations ----------------------------------------------------
+    ("01-PresentationsCatalogue", "A1", "Presentation Title header", "Field label", "Header used for mapping", "Excluded", "Header matched at import"),
+    ("01-PresentationsCatalogue", "A2:A67", "Presentation Title (filename-style, e.g. .pptx, .pdf, .xlsx, no extension)", "MC_Catalogue.Title and OriginalName", "Clean text; original kept in OriginalName; file type from the name, not assumed", "Reader", "66 titles imported; 61 pptx, 1 pdf, 1 xlsx, 3 without extension"),
+    ("01-PresentationsCatalogue", "A2:A67 hyperlinks", "Title hyperlink targets (63 absolute on OneDrive-for-Business host, 3 relative)", "MC_Catalogue.SourceRef (kind and raw target)", "Absolute targets kept; relative targets kept as unresolved, base never guessed; all 66 extracted", "Maintainer", "66 title links extracted (63 absolute, 3 relative unresolved)"),
+    ("01-PresentationsCatalogue", "B1", "Current Dir header", "Field label", "Header used for mapping", "Excluded", "Header matched at import"),
+    ("01-PresentationsCatalogue", "B2:B67", "Current Dir folder name", "MC_Catalogue.CurrentDirectory", "Text kept", "Reader", "Folder name populated for 66 rows"),
+    ("01-PresentationsCatalogue", "B2:B67 hyperlinks", "Folder links (64 relative)", "MC_Catalogue.CurrentDirRef (unresolved)", "Kept as raw relative target; never resolved against an assumed base", "Maintainer", "64 folder links preserved, all unresolved"),
+    ("01-PresentationsCatalogue", "C1:C67", "New Name", "MC_Catalogue.NewName", "Clean text; 61 distinct values", "Reader", "New name searchable"),
+    ("01-PresentationsCatalogue", "D1:D67", "Domain (AD 61, K12 2, WD 2, HE 1; list validation contains a leading space in ' HE')", "MC_Catalogue.DomainRaw + Domains (multi)", "Mapped via domain-mappings.json; AD flagged AllDomainsPendingConfirmation; no HE+WD in data", "Reader", "Domain counts 61 All Domains, 2 K-12, 2 WD, 1 HE; no double count"),
+    ("01-PresentationsCatalogue", "E1:E67", "Short Description", "MC_Catalogue.Description", "Clean text", "Reader", "Description searchable"),
+    ("01-PresentationsCatalogue", "F1:F67", "Puneet legacy column (one value: 'Very old file')", "MC_Catalogue.LegacyPuneet (Maintainer)", "Retained as legacy text; meaning NOT inferred", "Maintainer", "Single value retained; not shown to readers"),
+    ("01-PresentationsCatalogue", "G1:G67", "Review comments (66 populated, editorial)", "MC_ProtectedNotes (Restricted)", "Treated as protected by default until owner classifies it; flag ProtectedReviewNotePresent", "Restricted", "Text absent from reader payloads, search and export"),
+    ("01-PresentationsCatalogue", "H1:H67", "Slide Count/Duration (mixed numbers and text)", "MC_Catalogue.DurationOrSlides", "Kept as text because the column mixes units", "Reader", "36 distinct values retained as text"),
+    ("01-PresentationsCatalogue", "I1:I67", "Version (1-6) and header comment 'Current Published Version'", "MC_Catalogue.VersionLabel", "Kept as source label, separate from SharePoint version history", "Reader", "Version labels equal source values"),
+    ("01-PresentationsCatalogue", "J1:J67", "Status (all blank) with list validation Draft, In Review, Published, Archived", "MC_Catalogue.StatusRaw ('') + Status = Not specified", "Blank preserved; NeedsStatusReview; never Published by default", "Reader", "66 records show Not specified and NeedsStatusReview"),
+    ("01-PresentationsCatalogue", "K1:K67", "Source (PPT) (all blank; no hyperlinks)", "MC_Catalogue.SourceRef (missing) and SourceRendition library", "No file assumed; MissingSourceReference flag unless the title link is the source (assumption, see data-decisions)", "Maintainer", "Blank cells retained; availability reported as missing or unverified"),
+    ("01-PresentationsCatalogue", "L1:L67", "Published (PDF) (all blank; no hyperlinks)", "MC_Catalogue.PublishedRef (missing) and PublishedRendition library", "No published PDF fabricated or generated", "Maintainer", "All 66 show missing published file"),
+    ("01-PresentationsCatalogue", "M1:M67", "Last Updated (55 dates, 11 blank)", "MC_Catalogue.SourceUpdatedDate", "Native date; separate from SharePoint Modified", "Reader", "55 dates imported as native; 11 blank"),
+    ("01-PresentationsCatalogue", "N1:N67", "Last Updated By (4 names)", "MC_Catalogue.SourceEditorName (identity unresolved)", "Name kept; no email guessed; OwnerIdentityUnresolved", "Maintainer", "4 names kept; identity unresolved"),
+    ("01-PresentationsCatalogue", "I1, J1, H29, C41 comments", "Header comments (version and status definitions); H29 slide-count note; C41 title-check note", "Field definitions (docs); MC_ReviewTasks for C41 title check; MC_ProtectedNotes for H29", "Definitions confirm lifecycle values; title check becomes a review task", "Restricted", "C41 produces a title-change review task; H29 note absent from reader payloads"),
+    # --- 02 One-pagers -------------------------------------------------------
+    ("02-OnePager-Catalogue", "A1:A23", "One Pager (title)", "MC_Catalogue.Title", "Clean text", "Reader", "22 one-pagers imported"),
+    ("02-OnePager-Catalogue", "B1:B23", "Domain (K12 2, HE 3, WD 1, HE+WD 3, AD 13)", "MC_Catalogue.DomainRaw + Domains (multi)", "HE+WD becomes two domains counted once", "Reader", "HE+WD records appear under both domains and count once overall"),
+    ("02-OnePager-Catalogue", "C1:C23", "Description", "MC_Catalogue.Description", "Clean text", "Reader", "Description searchable"),
+    ("02-OnePager-Catalogue", "D1:D23", "Status (all Published)", "MC_Catalogue.Status = Published", "Published status kept, but file availability tracked separately", "Reader", "22 Published"),
+    ("02-OnePager-Catalogue", "E1:E23", "Source (PPT) values (19) with hyperlinks (19)", "MC_Catalogue.SourceRef and SourceRendition", "Link target kept; file availability unverified", "Maintainer", "19 source references preserved"),
+    ("02-OnePager-Catalogue", "F1:F23", "Published (PDF) values (19) with hyperlinks (19)", "MC_Catalogue.PublishedRef and PublishedRendition", "Link kept; PublishedWithoutPublishedFile raised for missing", "Maintainer", "19 published references; 3 Published with no published file"),
+    ("02-OnePager-Catalogue", "G1:G23", "Last Updated (native dates)", "MC_Catalogue.SourceUpdatedDate", "Native date", "Reader", "22 dates imported"),
+    ("02-OnePager-Catalogue", "H1:H23", "Last Updated By (two editors, 22 values)", "MC_Catalogue.SourceEditorName", "Names kept; identities unresolved", "Maintainer", "22 names kept; identity unresolved"),
+    ("02-OnePager-Catalogue", "I1:I23", "Reviewed By (one reviewer, all 22 values)", "MC_Catalogue.Reviewer", "Name kept; identity unresolved", "Maintainer", "22 reviewer names kept; identity unresolved"),
+    ("02-OnePager-Catalogue", "D1 comment", "Lifecycle definition comment", "Field definition (docs)", "Confirms lifecycle values", "Restricted", "Not shown to readers"),
+    # --- 03 Brochures --------------------------------------------------------
+    ("03-Brochure-Catalogue", "A1:A3", "Brochure Name", "MC_Catalogue.Title", "Clean text", "Reader", "2 brochures imported"),
+    ("03-Brochure-Catalogue", "B1:B3", "New Name", "MC_Catalogue.NewName", "Clean text", "Reader", "2 new names"),
+    ("03-Brochure-Catalogue", "C1:C3", "Domain (AD x2)", "MC_Catalogue.Domains", "AD flagged pending confirmation", "Reader", "2 All Domains records"),
+    ("03-Brochure-Catalogue", "D1:D3", "Short Description", "MC_Catalogue.Description", "Clean text", "Reader", "Descriptions present"),
+    ("03-Brochure-Catalogue", "E1:E3", "Version (blank) and header comment", "MC_Catalogue.VersionLabel (empty)", "Empty stays empty", "Reader", "Blank version shown as not recorded"),
+    ("03-Brochure-Catalogue", "F1:F3", "Status (Published x2)", "MC_Catalogue.Status = Published", "Kept; file availability separate", "Reader", "2 Published"),
+    ("03-Brochure-Catalogue", "G1:G3", "Source (PPT) values and hyperlinks (2)", "MC_Catalogue.SourceRef", "Link kept; file type pptx from name", "Maintainer", "2 source references preserved"),
+    ("03-Brochure-Catalogue", "H1:H3", "Published (PDF) (blank)", "MC_Catalogue.PublishedRef (missing)", "No published PDF generated; PublishedWithoutPublishedFile raised", "Maintainer", "Both brochures show missing published file"),
+    ("03-Brochure-Catalogue", "I1:J3", "Last Updated and Last Updated By (blank)", "MC_Catalogue.SourceUpdatedDate / SourceEditorName", "Blank kept blank", "Maintainer", "Owner not recorded"),
+    # --- 04-06 empty categories ----------------------------------------------
+    ("04-CaseStudiesCatalogue", "A1:J1", "Empty category headers (Case Study Title ... Last Updated By)", "MC_Catalogue fields for Case Studies", "Fields defined, no records imported", "Reader", "Zero records; empty state with Add action"),
+    ("04-CaseStudiesCatalogue", "E1, F1 comments", "Lifecycle and version definition comments", "Field definitions (docs)", "Confirms values", "Restricted", "Not shown to readers"),
+    ("05-MarketingVideos", "A1:J1", "Empty category headers (Video Title ... Published Video)", "MC_Catalogue fields for Marketing Videos (Published Video maps to PublishedRef)", "Fields defined, no records", "Reader", "Zero records; empty state with Add action"),
+    ("05-MarketingVideos", "E1, F1 comments", "Lifecycle and version definition comments", "Field definitions (docs)", "Confirms values", "Restricted", "Not shown to readers"),
+    ("06-RateCards", "A1:J1", "Empty category headers (Rate Card Title ... Published PDF)", "MC_Catalogue fields for Rate Cards", "Fields defined, no records; rate-card values never fabricated", "Reader", "Zero records; no rate card shown"),
+    ("06-RateCards", "E1, F1 comments", "Lifecycle and version definition comments", "Field definitions (docs)", "Confirms values", "Restricted", "Not shown to readers"),
+    # --- Hidden: Sheet1 -------------------------------------------------------
+    ("Sheet1", "A1:A48", "SECTION (K12, HE, WD, HE+WD, All, Brochure)", "MC_LegacyEvidence.SectionHint (Restricted)", "Hint only; never creates or changes a catalogue record", "Restricted", "Hidden rows do not change the 90-record count"),
+    ("Sheet1", "B1:B48", "Name (legacy filename or title)", "MC_LegacyEvidence.LegacyName (Restricted); candidate match", "Key match on name_key; 2 ambiguous, 30 unmatched, 1 notes-only row", "Restricted", "Matching results reported as counts only"),
+    ("Sheet1", "C1:C48", "Description", "MC_LegacyEvidence.Description (Restricted)", "Retained for review only", "Restricted", "Absent from reader payloads"),
+    ("Sheet1", "D1:D48", "New Name (legacy)", "MC_LegacyEvidence.LegacyNewName (Restricted); candidate match", "Key match on name_key", "Restricted", "Matching results counted"),
+    ("Sheet1", "E1:E48", "Presentation Link (32 absolute hyperlinks)", "MC_LegacyEvidence.LinkKind (Restricted)", "Link target kept only in restricted store; never applied to catalogue", "Restricted", "No hidden link replaces a visible link"),
+    ("Sheet1", "F1:F48", "Logo's to add (logo instruction text, 30)", "MC_ReviewTasks (Add/Change/Remove/Missing logo) after human review", "Free-text instruction never executed; no deletion from instruction", "Restricted", "Instructions produce review tasks only"),
+    ("Sheet1", "G1:G48", "Internal BDM Comments (27)", "MC_ProtectedNotes (Restricted)", "Never returned to readers, search or exports", "Restricted", "Text absent from reader payloads and exports"),
+    ("Sheet1", "H1:H48", "Updates on 21-Aug-26 (32, including 550+ claims)", "MC_ProtectedNotes; MC_ReviewTasks (conflicting statistics)", "550 claims flagged against the 700 FTE total; no claim declared valid", "Restricted", "Conflicts listed: Sheet1 H6, H7, H16, H17, H19, H29 and J19"),
+    ("Sheet1", "I1:I48, J1:J48 (no header)", "Unlabelled overflow (4 and 1 populated)", "MC_LegacyEvidence (Restricted); not interpreted", "Retained as restricted evidence; J19 holds a 550 claim", "Restricted", "Included in the conflict scan"),
+    ("Sheet1", "D2, D9 comments; B2 comments on sheet 02_001", "Duplicate-candidate and logo-difference notes", "MC_ReviewTasks (Duplicate candidate) after human review", "Never auto-merged or retired", "Restricted", "No automatic merge or retirement"),
+    # --- Hidden: 02-OnePager-Catalogue_001 ----------------------------------
+    ("02-OnePager-Catalogue_001", "A1:J33", "Legacy one-pager rows (32): name, new name, domain, description, version, status, source, published, updated, updated by", "MC_LegacyEvidence (Restricted); duplicate candidates", "Matched by title key: 0 matches; all 32 held for review", "Restricted", "No legacy row becomes a catalogue record"),
+    ("02-OnePager-Catalogue_001", "B2 comment; E1, F1 comments", "Duplicate note and lifecycle definitions", "MC_ReviewTasks and field definitions", "No merge or retirement automatically", "Restricted", "No automatic retirement"),
+    ("02-OnePager-Catalogue_001", "G1:G33 links (30)", "Legacy source hyperlinks", "MC_LegacyEvidence.LinkKind (Restricted)", "Retained only as restricted evidence", "Restricted", "Not applied to visible records"),
+    # --- Source file hygiene --------------------------------------------------
+    ("Workbook", "file", "Source workbook fingerprint (SHA-256)", "Import run record (MC_ImportMap) and docs", "Fingerprint recorded before and after read; source never written", "Owner", "sourceUnchanged = true"),
+    ("Workbook", "structure", "Formulas, data validations, tables (Table5 and Table6), autofilters", "Provenance only", "Formulas re-implemented explicitly; not executed", "Owner", "Derived results match cached values"),
+]
+
+
+def gather_workbook_cells(path):
+    wb = openpyxl.load_workbook(path, data_only=False)
+    populated = {}
+    for ws in wb.worksheets:
+        cols = set()
+        for row in ws.iter_rows():
+            for cell in row:
+                if cell.value not in (None, "") or cell.comment is not None or cell.hyperlink is not None:
+                    cols.add(cell.column_letter)
+        populated[ws.title] = cols
+    return populated
+
+
+CELL_REF = re.compile(r"\b([A-Z])\d*(?::([A-Z])\d*)?\b")
+
+
+def covered_columns(cols_text):
+    """Single-letter column letters named in a row's Columns text, expanding A1:D21-style ranges."""
+    found = set()
+    for match in CELL_REF.finditer(cols_text):
+        start = match.group(1)
+        end = match.group(2) or start
+        for code in range(ord(start), ord(end) + 1):
+            found.add(chr(code))
+    return found
+
+
+def covers(row_sheet, row_cols, sheet, column):
+    return row_sheet == sheet and column in covered_columns(row_cols)
+
+
+def render(rows):
+    out = [
+        "# Workbook traceability matrix",
+        "",
+        "Every meaningful source field, formula, hyperlink, comment and review note, with its destination,",
+        "transformation, visibility and acceptance test. Generated by `scripts/generate_traceability.py`.",
+        "Comment and hidden-note text is never reproduced here.",
+        "",
+        "Visibility: Reader (permitted readers), Maintainer, Owner, Restricted (protected store only),",
+        "Excluded (not imported), Derived (recalculated by the application).",
+        "",
+        "| Sheet | Columns | Source | Destination | Transformation | Visibility | Acceptance test |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
+    ]
+    for sheet, cols, source, dest, transform, vis, accept in rows:
+        out.append(f"| {sheet} | {cols} | {source} | {dest} | {transform} | {vis} | {accept} |")
+    out += [
+        "",
+        "## Deliberate exclusions",
+        "",
+        "- Home!B18 (plaintext credential): excluded; only the coordinate and reason are recorded.",
+        "- Hidden rows are not catalogue records; they are held as restricted evidence.",
+        "- Header-row labels are used for mapping only and are not shown as data.",
+        "- Rate card values, logo images, published PDFs and owner identities are not fabricated.",
+        "",
+    ]
+    return "\n".join(out)
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--workbook", required=True, type=Path)
+    parser.add_argument("--out", type=Path, default=ROOT / "docs" / "workbook-traceability.md")
+    args = parser.parse_args(argv)
+
+    populated = gather_workbook_cells(args.workbook)
+    missing = []
+    for sheet, cols in populated.items():
+        for column in sorted(cols):
+            if not any(covers(r[0], r[1], sheet, column) for r in ROWS):
+                missing.append(f"{sheet}!{column}")
+    if missing:
+        print("Traceability gap, no matrix row covers: " + ", ".join(missing), file=sys.stderr)
+        return 1
+    args.out.write_text(render(ROWS), encoding="utf-8")
+    print(f"Wrote {args.out} with {len(ROWS)} rows; every populated column is covered.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

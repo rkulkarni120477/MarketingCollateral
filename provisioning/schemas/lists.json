@@ -1,0 +1,116 @@
+{
+  "lists": [
+    {
+      "title": "MC_Catalogue",
+      "template": "GenericList",
+      "sensitivity": "maintainer",
+      "fields": [
+        ["StableId", "Text"], ["Category", "Text"], ["NewName", "Text"], ["DomainRaw", "Text"],
+        ["Domains", "Text"], ["Description", "Note"], ["StatusRaw", "Text"], ["LifecycleStatus", "Choice"],
+        ["VersionLabel", "Text"], ["SourceRef", "Note"], ["PublishedRef", "Note"], ["CurrentDir", "Text"],
+        ["CurrentDirLink", "Note"], ["SourceAvailability", "Choice"], ["PublishedAvailability", "Choice"],
+        ["SourceSheet", "Text"], ["SourceRow", "Text"], ["LastUpdated", "DateTime"], ["LastUpdatedBy", "Text"],
+        ["Owner", "Text"], ["Reviewer", "Text"], ["ReviewFlags", "Note"]
+      ]
+    },
+    {
+      "title": "MC_PublicCatalogue",
+      "template": "GenericList",
+      "sensitivity": "standard",
+      "fields": [
+        ["StableId", "Text"], ["Category", "Text"], ["NewName", "Text"], ["DomainRaw", "Text"],
+        ["Domains", "Text"], ["Description", "Note"], ["StatusRaw", "Text"], ["LifecycleStatus", "Choice"],
+        ["VersionLabel", "Text"], ["SourceRef", "Note"], ["PublishedRef", "Note"], ["CurrentDir", "Text"],
+        ["CurrentDirLink", "Note"], ["SourceAvailability", "Choice"], ["PublishedAvailability", "Choice"],
+        ["SourceSheet", "Text"], ["SourceRow", "Text"], ["LastUpdated", "DateTime"], ["LastUpdatedBy", "Text"],
+        ["Owner", "Text"], ["Reviewer", "Text"], ["ReviewFlags", "Note"]
+      ]
+    },
+    {
+      "title": "MC_Clients",
+      "template": "GenericList",
+      "sensitivity": "standard",
+      "fields": [["Domain", "Text"], ["LogoUrl", "Text"], ["SourceRow", "Text"]]
+    },
+    {
+      "title": "MC_Statistics",
+      "template": "GenericList",
+      "sensitivity": "standard",
+      "fields": [
+        ["ValueRaw", "Text"], ["ValueNumber", "Number"], ["Unit", "Text"], ["Qualifier", "Text"],
+        ["ApprovalState", "Choice"], ["ApprovalName", "Text"], ["EffectiveDate", "DateTime"],
+        ["StatisticGroup", "Text"], ["SourceRow", "Text"]
+      ]
+    },
+    {
+      "title": "MC_StatComponents",
+      "template": "GenericList",
+      "sensitivity": "standard",
+      "fields": [
+        ["Fte", "Number"], ["InTotal", "Boolean"], ["ApprovalState", "Choice"],
+        ["ApprovalName", "Text"], ["EffectiveDate", "DateTime"], ["SourceRow", "Text"]
+      ]
+    },
+    {
+      "title": "MC_ReviewTasks",
+      "template": "GenericList",
+      "sensitivity": "maintainer",
+      "fields": [["TaskType", "Text"], ["Status", "Choice"], ["ItemId", "Text"], ["AssignedTo", "Text"]]
+    },
+    {
+      "title": "MC_SiteContent",
+      "template": "GenericList",
+      "sensitivity": "standard",
+      "fields": [["Key", "Text"], ["TextValue", "Note"], ["UrlValue", "Text"]]
+    },
+    {
+      "title": "MC_ImportMap",
+      "template": "GenericList",
+      "sensitivity": "maintainer",
+      "fields": [["SourceFingerprint", "Text"], ["StableId", "Text"], ["SourceSheet", "Text"], ["SourceRow", "Text"]]
+    },
+    {
+      "title": "MC_ProtectedNotes",
+      "template": "GenericList",
+      "sensitivity": "owner",
+      "fields": [["ItemId", "Text"], ["NoteType", "Text"], ["NoteText", "Note"], ["SourceCell", "Text"]]
+    },
+    {
+      "title": "MC_LegacyEvidence",
+      "template": "GenericList",
+      "sensitivity": "owner",
+      "fields": [["SourceSheet", "Text"], ["SourceRow", "Text"], ["CandidateItemId", "Text"], ["MatchState", "Text"], ["EvidenceText", "Note"]]
+    },
+    {
+      "title": "MC_SourceFiles",
+      "template": "DocumentLibrary",
+      "sensitivity": "standard",
+      "fields": [["CatalogueStableId", "Text"]]
+    },
+    {
+      "title": "MC_Renditions",
+      "template": "DocumentLibrary",
+      "sensitivity": "standard",
+      "fields": [["CatalogueStableId", "Text"], ["LifecycleStatus", "Choice"]]
+    },
+    {
+      "title": "MC_Logos",
+      "template": "DocumentLibrary",
+      "sensitivity": "standard",
+      "fields": [["ClientId", "Text"]]
+    },
+    {
+      "title": "MC_Confidential",
+      "template": "DocumentLibrary",
+      "sensitivity": "confidential",
+      "fields": [["CatalogueStableId", "Text"]]
+    }
+  ],
+  "choices": {
+    "LifecycleStatus": ["Draft", "In Review", "Published", "Archived", "Not specified", "Unrecognised"],
+    "SourceAvailability": ["available", "reference-present-unverified", "missing", "inaccessible", "unresolved"],
+    "PublishedAvailability": ["available", "reference-present-unverified", "missing", "inaccessible", "unresolved"],
+    "ApprovalState": ["Approved", "Unapproved", "Unknown"],
+    "Status": ["Open", "In Progress", "Resolved", "Cancelled"]
+  }
+}

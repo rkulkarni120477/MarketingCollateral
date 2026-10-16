@@ -1,0 +1,15 @@
+{
+  "_status": "ASSUMPTION. Proposed by the solution architect; AD and ALL need owner confirmation before go-live.",
+  "_version": 1,
+  "mappings": {
+    "K12": ["K-12"],
+    "K-12": ["K-12"],
+    "HE": ["Higher Education"],
+    "WD": ["Workforce Development"],
+    "HE+WD": ["Higher Education", "Workforce Development"],
+    "AD": ["All Domains"],
+    "ALL": ["All Domains"]
+  },
+  "literalAllDomainsRawValues": ["AD", "ALL"],
+  "unmappedBehaviour": "flag-for-review"
+}

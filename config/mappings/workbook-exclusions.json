@@ -1,0 +1,6 @@
+{
+  "_status": "Cells excluded before any intermediate output. Only the coordinate and reason are recorded; the value is never read into output.",
+  "exclusions": [
+    { "sheet": "Home", "cell": "B18", "reason": "plaintext credential", "retainValue": false }
+  ]
+}

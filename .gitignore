@@ -1,0 +1,39 @@
+# Source data and private material: never commit
+MarketingCollateral.xlsx
+*.xlsx
+*.xlsm
+*.csv
+SnS Marketing Collateral Page Implementation Prompt.md
+backups/
+**/restricted/
+*.secret.*
+
+# Generated output
+migration/out/
+dist/
+temp/
+lib/
+lib-commonjs/
+jest-output/
+release/
+sharepoint/solution/debug/
+*.sppkg
+coverage/
+test-results/
+
+# Dependencies and tooling caches
+node_modules/
+.npm/
+*.log
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/

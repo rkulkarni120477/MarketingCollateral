@@ -1,0 +1,30 @@
+{
+  "_status": "Source sheet to category mapping. Column letters are verified against the workbook headers by the importer.",
+  "categories": {
+    "Presentations": {
+      "sheet": "01-PresentationsCatalogue",
+      "columns": { "title": "A", "currentDir": "B", "newName": "C", "domain": "D", "description": "E", "legacyPuneet": "F", "reviewComments": "G", "durationOrSlides": "H", "version": "I", "status": "J", "source": "K", "published": "L", "lastUpdated": "M", "lastUpdatedBy": "N" },
+      "titleLinkIsSource": true
+    },
+    "One-Pagers": {
+      "sheet": "02-OnePager-Catalogue",
+      "columns": { "title": "A", "domain": "B", "description": "C", "status": "D", "source": "E", "published": "F", "lastUpdated": "G", "lastUpdatedBy": "H", "reviewedBy": "I" }
+    },
+    "Brochures": {
+      "sheet": "03-Brochure-Catalogue",
+      "columns": { "title": "A", "newName": "B", "domain": "C", "description": "D", "version": "E", "status": "F", "source": "G", "published": "H", "lastUpdated": "I", "lastUpdatedBy": "J" }
+    },
+    "Case Studies": {
+      "sheet": "04-CaseStudiesCatalogue",
+      "columns": { "title": "A", "newName": "B", "domain": "C", "description": "D", "version": "E", "status": "F", "source": "G", "published": "H", "lastUpdated": "I", "lastUpdatedBy": "J" }
+    },
+    "Marketing Videos": {
+      "sheet": "05-MarketingVideos",
+      "columns": { "title": "A", "newName": "B", "domain": "C", "description": "D", "version": "E", "status": "F", "source": "G", "published": "H", "lastUpdated": "I", "lastUpdatedBy": "J" }
+    },
+    "Rate Cards": {
+      "sheet": "06-RateCards",
+      "columns": { "title": "A", "newName": "B", "domain": "C", "description": "D", "version": "E", "status": "F", "source": "G", "published": "H", "lastUpdated": "I", "lastUpdatedBy": "J" }
+    }
+  }
+}

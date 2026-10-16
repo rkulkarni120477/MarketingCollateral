@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "marketing-collateral-client-side-solution",
+    "id": "e2f4a98d-7d51-4a5e-97db-12d62d4226cd",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": false,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "SnS Marketing Collateral",
+      "websiteUrl": "https://academian.com",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.23.2"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "Marketing collateral catalogue for the SnS portal."
+      },
+      "longDescription": {
+        "default": "Browse and maintain the SnS marketing collateral catalogue."
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "Marketing Collateral Web Part",
+        "description": "Adds the Marketing Collateral client-side web part.",
+        "id": "5f5d66d6-13ba-4c41-90a4-2a63da2745dc",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/marketing-collateral.sppkg"
+  }
+}
